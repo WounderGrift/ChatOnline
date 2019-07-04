@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: info:info.ServOn:unknown">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/info/info.ServOn/unknown/info.ServOn-unknown.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/info/info.ServOn/unknown/info.ServOn-unknown-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/info/info.ServOn/unknown/info.ServOn-unknown-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
