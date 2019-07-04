@@ -1,8 +1,5 @@
-package Connection;
+package edu.Connection;
 
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
-
-import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.Charset;

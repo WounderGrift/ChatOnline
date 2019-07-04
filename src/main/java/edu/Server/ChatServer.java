@@ -1,10 +1,7 @@
-package Server;
-import Client.ClientWin;
-import Connection.TCP_Connection;
-import Connection.TCP_ConnectionListener;
-import org.hsqldb.Server;
+package edu.Server;
+import edu.Connection.TCP_Connection;
+import edu.Connection.TCP_ConnectionListener;
 
-import javax.swing.*;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
@@ -25,7 +22,7 @@ public class ChatServer implements TCP_ConnectionListener{
 
     //еще один конструктор
     private ChatServer(){
-        System.out.println("Server running...");
+        System.out.println("edu.Server running...");
 
         try(ServerSocket serverSocket = new ServerSocket(8189)){
             while(true){
@@ -43,7 +40,7 @@ public class ChatServer implements TCP_ConnectionListener{
     @Override
     public synchronized void onConnectionReady(TCP_Connection tcp_connection) {
         connections.add(tcp_connection);
-        sendToAllConnections("Client connected: " + tcp_connection);
+        sendToAllConnections("edu.Client connected: " + tcp_connection);
     }
 
     @Override
@@ -54,7 +51,7 @@ public class ChatServer implements TCP_ConnectionListener{
     @Override
     public synchronized void onDisconnect(TCP_Connection tcp_connection) {
         connections.remove(tcp_connection);
-        sendToAllConnections("Client disconnected: " + tcp_connection);
+        sendToAllConnections("edu.Client disconnected: " + tcp_connection);
     }
 
     @Override

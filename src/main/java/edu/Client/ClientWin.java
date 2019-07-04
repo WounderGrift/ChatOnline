@@ -1,7 +1,7 @@
-package Client;
+package edu.Client;
 
-import Connection.TCP_Connection;
-import Connection.TCP_ConnectionListener;
+import edu.Connection.TCP_Connection;
+import edu.Connection.TCP_ConnectionListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -64,7 +64,7 @@ public class ClientWin extends JFrame implements ActionListener, TCP_ConnectionL
         try {
             connection = new TCP_Connection(this, IP_ADDR, PORT);
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Connection exception: " + e);
+            JOptionPane.showMessageDialog(null, "edu.Connection exception: " + e);
         }
     }
 
@@ -84,7 +84,7 @@ public class ClientWin extends JFrame implements ActionListener, TCP_ConnectionL
 
     @Override
     public synchronized void onConnectionReady(TCP_Connection tcp_connection) {
-        printMessage("Connection ready...");
+        printMessage("edu.Connection ready...");
     }
 
     @Override
@@ -94,12 +94,12 @@ public class ClientWin extends JFrame implements ActionListener, TCP_ConnectionL
 
     @Override
     public void onDisconnect(TCP_Connection tcp_connection) {
-        printMessage("Connection close");
+        printMessage("edu.Connection close");
     }
 
     @Override
     public synchronized void onException(TCP_Connection tcp_connection, Exception e) {
-        JOptionPane.showMessageDialog(null, "Connection exception: " + e);
+        JOptionPane.showMessageDialog(null, "edu.Connection exception: " + e);
     }
 
     //сдвинуть его выше

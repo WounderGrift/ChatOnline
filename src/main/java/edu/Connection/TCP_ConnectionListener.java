@@ -1,4 +1,4 @@
-package Connection;
+package edu.Connection;
 
 public interface TCP_ConnectionListener {
     void onConnectionReady(TCP_Connection tcp_connection);
