@@ -1,49 +1,57 @@
-package edu.Client;
+package edu.client;
 
-import edu.Connection.TCP_Connection;
-import edu.Connection.TCP_ConnectionListener;
+import edu.connection.TCPconnection;
+import edu.connection.TCPconnectionListener;
+import edu.server.ChatServer;
+import sun.misc.BASE64Decoder;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.sql.*;
 
 /**
  * Created by Dima on 03.07.2019.
- * Сначала запустить сервер потом клиент
+ * Сначала запустить сервер потом ClientReg
  */
 
-public class ClientWin extends JFrame implements ActionListener, TCP_ConnectionListener{
+public class ClientWin extends JFrame implements ActionListener, TCPconnectionListener {
     private static final String IP_ADDR = "127.0.0.1";
     private static final int PORT = 8189;
     private static final int WIDTH = 600;
     private static final int HEIGHT = 400;
+    private static String name = ClientReg.name;
+    private static String pass = ClientReg.pass;
     private String msg;
 
-    private TCP_Connection connection;
+    private TCPconnection connection;
 
 
-    public static void main(String[] args) {
-        //Эта штука нужна для запуска ассинхронной операци
+        public static void main(String[] args) {
+
+            //Эта штука нужна для запуска ассинхронной операци
         //Сохраняет дейсвтие runnable и запускает его на одном из следующих итераций цикла сообщений
-        //При помощи нее можно отложить какую-лтбо операцию на потом.
-            SwingUtilities.invokeLater((new Runnable() {
-                @Override
-                public void run() {
-                    new ClientWin();
-                }
-            }));
+        //При помощи нее можно отложить какую-либо операцию на потом.
+        SwingUtilities.invokeLater((new Runnable() {
+            @Override
+            public void run() {
+                new ClientWin();
+            }
+        }));
 
     }
 
     //Немножко формочек
     private final JTextArea log = new JTextArea();
     //Делать ли регистрацию пользователя
-    private final JTextField fieldNickName = new JTextField("User");
+    private final JTextField fieldNickName = new JTextField("Вы вошли как "+ name);
     private final JTextField fieldinput = new JTextField();
 
-    private ClientWin(){
+
+
+     ClientWin(){
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(WIDTH, HEIGHT);
         setLocationRelativeTo(null);
@@ -53,6 +61,7 @@ public class ClientWin extends JFrame implements ActionListener, TCP_ConnectionL
         log.setLineWrap(true);
         add(log, BorderLayout.CENTER);
 
+        fieldNickName.setEditable(false);
         fieldinput.addActionListener(this);
         add(fieldNickName, BorderLayout.NORTH);
         add(fieldinput, BorderLayout.SOUTH);
@@ -62,9 +71,9 @@ public class ClientWin extends JFrame implements ActionListener, TCP_ConnectionL
         //  Здесь намертво вставет интерфейс, возможно нужно подключить локальный сервер
         //  Нет, ошибка была в разных портах сервера и клиента
         try {
-            connection = new TCP_Connection(this, IP_ADDR, PORT);
+            connection = new TCPconnection(this, IP_ADDR, PORT);
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "edu.Connection exception: " + e);
+            JOptionPane.showMessageDialog(null, "Connection exception: " + e);
         }
     }
 
@@ -76,30 +85,30 @@ public class ClientWin extends JFrame implements ActionListener, TCP_ConnectionL
             return;
         } else{
             fieldinput.setText(null);
-            connection.SendString(fieldNickName.getText() + ": " + msg);
+            connection.sendString(name + ": " + msg);
         }
     }
 
     //Метод интерфейса приконнектится - написать - дисконнектится - поймать ошибку
 
     @Override
-    public synchronized void onConnectionReady(TCP_Connection tcp_connection) {
-        printMessage("edu.Connection ready...");
+    public synchronized void onConnectionReady(TCPconnection tcp_connection) {
+        printMessage("Connection ready...");
     }
 
     @Override
-    public synchronized void onReceiveString(TCP_Connection tcp_connection, String value) {
+    public synchronized void onReceiveString(TCPconnection tcp_connection, String value) {
         printMessage(value);
     }
 
     @Override
-    public void onDisconnect(TCP_Connection tcp_connection) {
-        printMessage("edu.Connection close");
+    public void onDisconnect(TCPconnection tcp_connection) {
+        printMessage("Connection close");
     }
 
     @Override
-    public synchronized void onException(TCP_Connection tcp_connection, Exception e) {
-        JOptionPane.showMessageDialog(null, "edu.Connection exception: " + e);
+    public synchronized void onException(TCPconnection tcp_connection, Exception e) {
+        JOptionPane.showMessageDialog(null, "Connection exception: " + e);
     }
 
     //сдвинуть его выше
@@ -112,4 +121,5 @@ public class ClientWin extends JFrame implements ActionListener, TCP_ConnectionL
             }
         });
     }
+
 }

@@ -1,4 +1,4 @@
-package edu.Connection;
+package edu.connection;
 
 import java.io.*;
 import java.net.Socket;
@@ -8,25 +8,25 @@ import java.nio.charset.Charset;
  * Created by Dima on 03.07.2019.
  */
 
-public class TCP_Connection {
+public class TCPconnection {
     //сокет-сввязь, через который сервер общается с клиентом
     private final Socket socket;
     //поток
     private final Thread rxThread;
     //Интерфейс слушатель-подключения
-    private final TCP_ConnectionListener eventListener;
+    private final TCPconnectionListener eventListener;
     //поток чтения из сокета
     private final BufferedReader in;
     //поток записи в сокет
     private final BufferedWriter out;
 
     //конструктор для инит объект подключение (с параметором адреса и порта для сокета и слушателя для действия)
-    public TCP_Connection(TCP_ConnectionListener eventListener, String ipAddr, int port) throws IOException{
+    public TCPconnection(TCPconnectionListener eventListener, String ipAddr, int port) throws IOException{
         this(eventListener, new Socket(ipAddr, port));
     }
 
     //еще один метод конструктор
-    public TCP_Connection(final TCP_ConnectionListener eventListener, Socket socket) throws IOException {
+    public TCPconnection(final TCPconnectionListener eventListener, Socket socket) throws IOException {
         this.socket = socket;
         this.eventListener = eventListener;
         //если у потоков возникнут исключение, то оно пробросится дальше
@@ -39,17 +39,16 @@ public class TCP_Connection {
             public void run() {
                 try {
                     //слушатель - подключение готово
-                    eventListener.onConnectionReady(TCP_Connection.this);
+                    eventListener.onConnectionReady(TCPconnection.this);
                     //до тех пор пока подклюбчение не разрушенно, списываем строку
                     while (!rxThread.isInterrupted()){
-                        eventListener.onReceiveString(TCP_Connection.this, in.readLine());
+                        eventListener.onReceiveString(TCPconnection.this, in.readLine());
                     }
                     String mes = in.readLine();
-
                 } catch (IOException e) {
-                    eventListener.onException(TCP_Connection.this, e);
-                } finally {
-                    eventListener.onDisconnect(TCP_Connection.this);
+                    eventListener.onException(TCPconnection.this, e);
+                } finally{
+                    eventListener.onDisconnect(TCPconnection.this);
                 }
             }
         });
@@ -57,22 +56,22 @@ public class TCP_Connection {
     }
 
     //синхронизируем методы, чтобы он выполнялся только одним потоком
-    public synchronized void SendString(String value){
+    public synchronized void sendString(String value){
         try {
             out.write(value + "\r\n");
             out.flush();
         } catch (IOException e) {
-            eventListener.onException(TCP_Connection.this, e);
-            Disconnect();
+            eventListener.onException(TCPconnection.this, e);
+            disconnect();
         }
     }
 
-    public synchronized void Disconnect(){
+    public synchronized void disconnect(){
         rxThread.interrupt();
         try {
             socket.close();
         } catch (IOException e) {
-            eventListener.onException(TCP_Connection.this, e);
+            eventListener.onException(TCPconnection.this, e);
         }
     }
 
