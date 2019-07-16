@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Created by Dima on 03.07.2019.
@@ -46,12 +47,12 @@ public class ChatServer implements TCPconnectionListener {
             }
         }catch (IOException e) {
             throw new RuntimeException(e);
+
         }
     }
 
     public static void RegistrUsers() throws SQLException {
        connectBD.registrUsers();
-
     }
 
     public static void AuthorisUsers() throws SQLException {

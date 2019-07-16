@@ -24,31 +24,33 @@ public class ConnectBD {
     public String password;
     public Connection con;
     public Statement st;
+    public ResultSet rs;
+    public PreparedStatement select;
 
     public static void main(String[] args) {
         new ConnectBD();
     }
 
-    ConnectBD(){
+    ConnectBD() {
         Properties prop = new Properties();
 
         try (InputStream in = Files.newInputStream(Paths.get("src/main/resources/database.properties"))) {
-        prop.load(in);
-        URL = prop.getProperty("URL");
-        owner = prop.getProperty("owner");
-        password = prop.getProperty("password");
+            prop.load(in);
+            URL = prop.getProperty("URL");
+            owner = prop.getProperty("owner");
+            password = prop.getProperty("password");
 
-        con = DriverManager.getConnection(URL, owner, password);
-        st = con.createStatement();
+            con = DriverManager.getConnection(URL, owner, password);
+            st = con.createStatement();
 
-        System.out.println(URL + " " + owner + " " + password);
-    } catch (IOException e) {
-        System.out.println("Error of read properties: " + e);
-    } catch (SQLException e) {
-        System.out.println("Error of connection: " + e);
+            System.out.println(URL + " " + owner + " " + password);
+        } catch (IOException e) {
+            System.out.println("Error of read properties: " + e);
+        } catch (SQLException e) {
+            System.out.println("Error of connection: " + e);
+        }
+
     }
-
-}
 
     public void CreateTable() {
          try{
@@ -89,7 +91,7 @@ public class ConnectBD {
             PreparedStatement select = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.USER WHERE TESTDB.PUBLIC.USER.NAME = ? AND TESTDB.PUBLIC.USER.PASS = ?");
             select.setString(1, ClientReg.getName());
             select.setString(2, encodedPassword());
-            ResultSet rs = select.executeQuery();
+            rs = select.executeQuery();
 
             while (rs.next()) {
                     System.out.println("Log in " + rs.getInt("id") + " " + rs.getString("name") + " " + rs.getString("pass"));
@@ -116,38 +118,39 @@ public class ConnectBD {
           int id = 0;
           ResultSet rs;
 
-          PreparedStatement selectID = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.USER WHERE TESTDB.PUBLIC.USER.NAME = ?");
-          selectID.setString(1, ClientReg.getName());
+          select = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.USER WHERE TESTDB.PUBLIC.USER.NAME = ?");
+          select.setString(1, ClientReg.getName());
 
-          rs = selectID.executeQuery();
+          rs = select.executeQuery();
 
           while (rs.next()) {
               System.out.println("Этот пользователь уже есть");
-              selectID.close();
+              select.close();
 
               return;
           }
 
-          selectID.close();
+          select.close();
 //===========================Узнать, есть ли этот пользователь
 
-          selectID = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.USER");
-           rs = selectID.executeQuery();
+          select = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.USER");
+           rs = select.executeQuery();
 
           while (rs.next()) {
               System.out.println("Exist user: " + rs.getInt("ID") + " " + rs.getString("NAME") + " " + rs.getString("PASS"));
               id = rs.getInt("ID") + 1;
           }
+          select.close();
 //============================Узнать последний ID
-            PreparedStatement ps = con.prepareStatement("INSERT INTO TESTDB.PUBLIC.USER (id, name, pass) VALUES (?, ?, ?)");
-            ps.setInt(1, id);
-            ps.setString(2, ClientReg.getName());
-            ps.setString(3, encodedPassword());
+            select = con.prepareStatement("INSERT INTO TESTDB.PUBLIC.USER (id, name, pass) VALUES (?, ?, ?)");
+            select.setInt(1, id);
+            select.setString(2, ClientReg.getName());
+            select.setString(3, encodedPassword());
 
-            ps.executeUpdate();
-            ps.close();
+            select.executeUpdate();
+            select.close();
 //=================================Записать пользователя
-            PreparedStatement select = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.USER WHERE ID = " + id +" ");
+            select = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.USER WHERE ID = " + id +" ");
             rs = select.executeQuery();
 
             while (rs.next()) {
