@@ -2,15 +2,11 @@ package edu.client;
 
 import edu.connection.TCPconnection;
 import edu.connection.TCPconnectionListener;
-import edu.server.ChatServer;
-import sun.misc.BASE64Decoder;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.sql.*;
 
 /**
  * Created by Dima on 03.07.2019.
@@ -51,7 +47,7 @@ public class ClientWin extends JFrame implements ActionListener, TCPconnectionLi
 
 
 
-     ClientWin(){
+     public ClientWin(){
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(WIDTH, HEIGHT);
         setLocationRelativeTo(null);
@@ -68,8 +64,8 @@ public class ClientWin extends JFrame implements ActionListener, TCPconnectionLi
 
         setVisible(true);
 
-        //  Здесь намертво вставет интерфейс, возможно нужно подключить локальный сервер
-        //  Нет, ошибка была в разных портах сервера и клиента
+        //  Здесь намертво вставет интерфейс
+        //  Oшибка была в разных портах сервера и клиента
         try {
             connection = new TCPconnection(this, IP_ADDR, PORT);
         } catch (IOException e) {

@@ -2,6 +2,7 @@ package edu.server;
 import edu.connection.TCPconnection;
 import edu.connection.TCPconnectionListener;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.sql.*;
@@ -16,9 +17,16 @@ public class ChatServer implements TCPconnectionListener {
 
    public static ConnectBD connectBD = new ConnectBD();
 
-    public static void main(String[] args) throws ClassNotFoundException {
+    public static void main(String[] args) throws ClassNotFoundException, SQLException {
+        connectBD.CreateTable();
 
-        new ChatServer();    //есть объект сервера
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+
+                new ChatServer();    //есть объект сервера
+            }
+        });
 
     }
         //в нем есть список всех подключившихся устройств
@@ -41,13 +49,13 @@ public class ChatServer implements TCPconnectionListener {
         }
     }
 
-    public static void RegistrUsers(String name, String pass) {
-       ConnectBD.RegistrUsers(name, pass);
+    public static void RegistrUsers() throws SQLException {
+       connectBD.registrUsers();
 
     }
 
-    public static void AuthorisUsers(String name, String pass){
-        ConnectBD.AuthorisUsers(name, pass);
+    public static void AuthorisUsers() throws SQLException {
+        connectBD.authorisUsers();
     }
 
     @Override

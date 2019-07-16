@@ -1,13 +1,17 @@
 package edu.server;
 
-import com.sun.xml.internal.bind.v2.model.core.ID;
+import edu.client.ClientReg;
 import sun.misc.BASE64Decoder;
-
+import sun.misc.BASE64Encoder;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.*;
+import java.util.Properties;
 
 
 /**
@@ -15,29 +19,50 @@ import java.sql.*;
  */
 
 public class ConnectBD {
-    public static String URL = "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1";
-    public static String owner = "sa";
-    public static String password = "";
+    public String URL;
+    public String owner;
+    public String password;
+    public Connection con;
+    public Statement st;
 
     public static void main(String[] args) {
         new ConnectBD();
-        
     }
 
-    public ConnectBD() {
-        try(Connection con = DriverManager.getConnection(URL, owner, password); Statement st = con.createStatement()) {
+    ConnectBD(){
+        Properties prop = new Properties();
 
-                st.execute("CREATE TABLE USER(\n" +
+        try (InputStream in = Files.newInputStream(Paths.get("src/main/resources/database.properties"))) {
+        prop.load(in);
+        URL = prop.getProperty("URL");
+        owner = prop.getProperty("owner");
+        password = prop.getProperty("password");
+
+        con = DriverManager.getConnection(URL, owner, password);
+        st = con.createStatement();
+
+        System.out.println(URL + " " + owner + " " + password);
+    } catch (IOException e) {
+        System.out.println("Error of read properties: " + e);
+    } catch (SQLException e) {
+        System.out.println("Error of connection: " + e);
+    }
+
+}
+
+    public void CreateTable() {
+         try{
+
+                st.execute("CREATE TABLE IF NOT EXISTS TESTDB.PUBLIC.USER(\n" +
                         "  id INT AUTO_INCREMENT PRIMARY KEY,\n" +
                         "  name VARCHAR(50),\n" +
                         "  pass VARCHAR(50));");
 
-                st.execute("CREATE TABLE MESSAGE(\n" +
+                st.execute("CREATE TABLE IF NOT EXISTS TESTDB.PUBLIC.MESSAGE(\n" +
                         "id INT AUTO_INCREMENT PRIMARY KEY,\n" +
                         "msg VARCHAR(255));");
 
-                st.execute("CREATE TABLE \"USERS_MESSAGE\"\n" +
-                        "(\n" +
+                st.execute("CREATE TABLE IF NOT EXISTS TESTDB.PUBLIC.USERS_MESSAGE (\n" +
                         "  USER_ID INT NOT NULL,\n" +
                         "  MSG_ID INT NOT NULL,\n" +
                         "  CONSTRAINT USERS_MESSAGE_USER_ID_fkey FOREIGN KEY (USER_ID)\n" +
@@ -46,76 +71,115 @@ public class ConnectBD {
                         "  REFERENCES public.MESSAGE (ID)\n" +
                         ");");
 
-                    st.close();
-                    con.close();
-
                     System.out.println("Tables is created");
 
+                   // st.close();
+                   // con.close();
+
             } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-    }
-
-    public static void AuthorisUsers(String name, String pass){
-
-        try(Connection con = DriverManager.getConnection(URL, owner, password); Statement st = con.createStatement();
-        ResultSet resultSet = st.executeQuery("SELECT * FROM USER")){
-            String decodedPass = null;
-            System.out.println("Initial user's table content:");
-            while(resultSet.next()){
-             /*   if(name == resultSet.getString(1)) {
-                    String n = resultSet.getString(1);
-                }
-
-                if(pass == resultSet.getString(2)) {
-
-
-                    try{
-                        BASE64Decoder dec = new BASE64Decoder();
-                        decodedPass = new String(dec.decodeBuffer(pass));
-                    } catch (IOException ioe) {
-                        ioe.printStackTrace();
-                    }
-
-                    String p = resultSet.getString(2);
-                }*/
-                int t = resultSet.getInt("ID");
-                String n = resultSet.getString("NAME");
-                String p = resultSet.getString("PASS");
-
-                System.out.println("Login in " + n + p);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Error " + e);
         }
+
     }
 
-   public static void RegistrUsers(String name, String pass) {
-        int id = 2;
+    public void authorisUsers() {
+        boolean gonnaToWin = false;
 
-         try (Connection con = DriverManager.getConnection(URL, owner,  password); Statement st = con.createStatement()) {
-       try (PreparedStatement ps = con.prepareStatement("INSERT INTO TESTDB.PUBLIC.USER (ID, NAME, PASS) VALUES (?, ?, ?)")) {
-           ps.setInt(1, id);
-           ps.setString(2, name);
-           ps.setString(3, pass);
+      try{
+            PreparedStatement select = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.USER WHERE TESTDB.PUBLIC.USER.NAME = ? AND TESTDB.PUBLIC.USER.PASS = ?");
+            select.setString(1, ClientReg.getName());
+            select.setString(2, encodedPassword());
+            ResultSet rs = select.executeQuery();
 
-           ps.execute();
-           System.out.println("Sign in " + name + " " + pass);
+            while (rs.next()) {
+                    System.out.println("Log in " + rs.getInt("id") + " " + rs.getString("name") + " " + rs.getString("pass"));
+                    gonnaToWin = !gonnaToWin;
+            }
+            select.close();
 
-
-       } catch (SQLException e) {
-           e.printStackTrace();
-       }
-
-             st.close();
-             con.close();
+            if(gonnaToWin){
+                ClientReg.openWindowClient();
+            } else {
+                System.out.println("Неправильное имя или пароль");
+                return;
+            }
 
         } catch (SQLException e) {
-             e.printStackTrace();
-         }
+          System.out.println("Error: " + e);
+      }
+    }
 
-   }
+
+    public void registrUsers()  {
+
+      try{
+          int id = 0;
+          ResultSet rs;
+
+          PreparedStatement selectID = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.USER WHERE TESTDB.PUBLIC.USER.NAME = ?");
+          selectID.setString(1, ClientReg.getName());
+
+          rs = selectID.executeQuery();
+
+          while (rs.next()) {
+              System.out.println("Этот пользователь уже есть");
+              selectID.close();
+
+              return;
+          }
+
+          selectID.close();
+//===========================Узнать, есть ли этот пользователь
+
+          selectID = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.USER");
+           rs = selectID.executeQuery();
+
+          while (rs.next()) {
+              System.out.println("Exist user: " + rs.getInt("ID") + " " + rs.getString("NAME") + " " + rs.getString("PASS"));
+              id = rs.getInt("ID") + 1;
+          }
+//============================Узнать последний ID
+            PreparedStatement ps = con.prepareStatement("INSERT INTO TESTDB.PUBLIC.USER (id, name, pass) VALUES (?, ?, ?)");
+            ps.setInt(1, id);
+            ps.setString(2, ClientReg.getName());
+            ps.setString(3, encodedPassword());
+
+            ps.executeUpdate();
+            ps.close();
+//=================================Записать пользователя
+            PreparedStatement select = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.USER WHERE ID = " + id +" ");
+            rs = select.executeQuery();
+
+            while (rs.next()) {
+                System.out.println("Sign in " + rs.getInt(1) + " " + rs.getString(2) + " " + rs.getString(3));
+            }
+
+            select.close();
+//=================================Показать на консоль кто зарегистрировался
+            ClientReg.openWindowClient();
+
+        } catch (SQLException e) {
+          System.out.println("Error: " + e);
+      }
+    }
+
+    public String encodedPassword(){
+        BASE64Encoder enc = new BASE64Encoder();
+        String encodedPass = enc.encode(ClientReg.getPass().getBytes());
+        enc = null;
+        return encodedPass;
+    }
+
+    public String decodedPassword(String encodedPass){
+        String decodedPass = null;
+        try{
+            BASE64Decoder dec = new BASE64Decoder();
+            decodedPass = new String(dec.decodeBuffer(encodedPass));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+
+        return decodedPass;
+    }
 
 }//end

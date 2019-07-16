@@ -1,12 +1,7 @@
 package edu.client;
 
 import edu.server.ChatServer;
-import edu.server.ConnectBD;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
-
 import javax.swing.*;
-import java.io.IOException;
 import java.sql.*;
 import java.util.Scanner;
 
@@ -15,9 +10,18 @@ import java.util.Scanner;
  */
 
 public class ClientReg{
-    public static String name, pass;
+    public static String name;
+    public static String pass;
 
-    public static void main(String[] args) {
+    public static String getName() {
+        return name;
+    }
+
+    public static String getPass() {
+        return pass;
+    }
+
+    public static void main(String[] args) throws SQLException {
         Scanner come = new Scanner(System.in);
         boolean loop = true;
         String select;
@@ -35,7 +39,7 @@ public class ClientReg{
                     System.out.print("Введите ваш пароль: ");
                     pass = come.nextLine();
 
-                    ChatServer.AuthorisUsers(name, pass);
+                    ChatServer.AuthorisUsers();
                 }
                 break;
                 case "N": {
@@ -45,11 +49,7 @@ public class ClientReg{
                     System.out.print("Введите ваш пароль: ");
                     pass = come.nextLine();
 
-                    BASE64Encoder enc = new BASE64Encoder();
-                    String encodedPass = enc.encode(pass.getBytes());
-                    enc = null;
-
-                    ChatServer.RegistrUsers(name, pass);
+                    ChatServer.RegistrUsers();
 
                 }
                 break;
@@ -62,6 +62,11 @@ public class ClientReg{
         }
         come.close();
 
+
+
+    }
+
+    public static void openWindowClient(){
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -69,7 +74,7 @@ public class ClientReg{
 
             }
         });
-
     }
+
 
 }
