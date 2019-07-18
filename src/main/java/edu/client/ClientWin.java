@@ -2,6 +2,7 @@ package edu.client;
 
 import edu.connection.TCPconnection;
 import edu.connection.TCPconnectionListener;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -18,36 +19,19 @@ public class ClientWin extends JFrame implements ActionListener, TCPconnectionLi
     private static final int PORT = 8189;
     private static final int WIDTH = 600;
     private static final int HEIGHT = 400;
-    private static String name = ClientReg.name;
-    private static String pass = ClientReg.pass;
+    private String name;
     private String msg;
 
     private TCPconnection connection;
 
-
-        public static void main(String[] args) {
-
-            //Эта штука нужна для запуска ассинхронной операци
-        //Сохраняет дейсвтие runnable и запускает его на одном из следующих итераций цикла сообщений
-        //При помощи нее можно отложить какую-либо операцию на потом.
-        SwingUtilities.invokeLater((new Runnable() {
-            @Override
-            public void run() {
-                new ClientWin();
-            }
-        }));
-
-    }
-
     //Немножко формочек
     private final JTextArea log = new JTextArea();
-    //Делать ли регистрацию пользователя
-    private final JTextField fieldNickName = new JTextField("Вы вошли как "+ name);
     private final JTextField fieldinput = new JTextField();
 
 
+    ClientWin(User user) {
+        name = user.getName();
 
-     public ClientWin(){
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(WIDTH, HEIGHT);
         setLocationRelativeTo(null);
@@ -57,6 +41,7 @@ public class ClientWin extends JFrame implements ActionListener, TCPconnectionLi
         log.setLineWrap(true);
         add(log, BorderLayout.CENTER);
 
+        JTextField fieldNickName = new JTextField("Вы вошли как " + name);
         fieldNickName.setEditable(false);
         fieldinput.addActionListener(this);
         add(fieldNickName, BorderLayout.NORTH);
@@ -77,9 +62,9 @@ public class ClientWin extends JFrame implements ActionListener, TCPconnectionLi
     @Override
     public void actionPerformed(ActionEvent e) {
         this.msg = fieldinput.getText();
-        if(msg.equals("")){
+        if (msg.equals("")) {
             return;
-        } else{
+        } else {
             fieldinput.setText(null);
             connection.sendString(name + ": " + msg);
         }
@@ -108,7 +93,7 @@ public class ClientWin extends JFrame implements ActionListener, TCPconnectionLi
     }
 
     //сдвинуть его выше
-    private synchronized void printMessage(final String str){
+    private synchronized void printMessage(final String str) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {

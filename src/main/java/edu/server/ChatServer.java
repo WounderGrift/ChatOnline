@@ -1,4 +1,6 @@
 package edu.server;
+
+import edu.client.User;
 import edu.connection.TCPconnection;
 import edu.connection.TCPconnectionListener;
 
@@ -16,10 +18,10 @@ import java.util.logging.Logger;
 
 public class ChatServer implements TCPconnectionListener {
 
-   public static ConnectBD connectBD = new ConnectBD();
+    private static ConnectBD connectBD;
 
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
-        connectBD.CreateTable();
+        connectBD = ConnectBD.getInstanse();
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -30,33 +32,38 @@ public class ChatServer implements TCPconnectionListener {
         });
 
     }
-        //в нем есть список всех подключившихся устройств
+
+    //в нем есть список всех подключившихся устройств
     private final ArrayList<TCPconnection> connections = new ArrayList<>();
 
     //еще один конструктор
-    public ChatServer(){
+    private ChatServer() {
         System.out.println("server running...");
 
-        try(ServerSocket serverSocket = new ServerSocket(8189)){
-            while(true){
+        try (ServerSocket serverSocket = new ServerSocket(8189)) {
+            while (true) {
                 try {
                     new TCPconnection(this, serverSocket.accept());
-                }   catch (IOException e){
+                } catch (IOException e) {
                     System.out.println("TCPConnection exception: " + e);
                 }
             }
-        }catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
 
         }
     }
 
-    public static void RegistrUsers() throws SQLException {
-       connectBD.registrUsers();
+    public static void RegistrUsers(User user) {
+        connectBD = ConnectBD.getInstanse();
+        System.out.println(connectBD);
+        connectBD.registrUsers(user);
     }
 
-    public static void AuthorisUsers() throws SQLException {
-        connectBD.authorisUsers();
+    public static void AuthorisUsers(User user) {
+        connectBD = ConnectBD.getInstanse();
+        System.out.println(connectBD);
+        connectBD.authorisUsers(user);
     }
 
     @Override
@@ -82,10 +89,10 @@ public class ChatServer implements TCPconnectionListener {
     }
 
     //Отправить всем присоединившимся
-    private void sendToAllConnections(String value){
+    private void sendToAllConnections(String value) {
         System.out.println(value);
         final int cnt = connections.size();
-        for(int i = 0; i<cnt; i++)
+        for (int i = 0; i < cnt; i++)
             connections.get(i).sendString(value);
 
     }
