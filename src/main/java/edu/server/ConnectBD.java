@@ -1,6 +1,7 @@
 package edu.server;
 
 import edu.client.ClientReg;
+import edu.client.ClientWin;
 import edu.client.User;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
@@ -29,9 +30,11 @@ public class ConnectBD {
     private ResultSet rs;
     private PreparedStatement select;
 
+    private String msg;
+
     private static ConnectBD instanse;
 
-    static ConnectBD getInstanse() {
+    public static ConnectBD getInstanse() {
         if (instanse == null) {
             instanse = new ConnectBD();
         }
@@ -158,16 +161,51 @@ public class ConnectBD {
             select.executeUpdate();
             select.close();
 //=================================Записать пользователя
-            select = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.USER WHERE ID = " + id + " ");
+            select = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.USER WHERE ID = " + id);
             rs = select.executeQuery();
 
             while (rs.next()) {
                 System.out.println("Sign in " + rs.getInt(1) + " " + rs.getString(2) + " " + rs.getString(3));
             }
-            int x = rs.getMetaData().getColumnCount();
             select.close();
-//=================================Показать на консоль кто зарегистрировался
+
             ClientReg.openWindowClient(user);
+
+        } catch (SQLException e) {
+            System.out.println("Error: " + e);
+        }
+    }
+
+    public void messagePutToBD(String msg) {
+        try {
+
+            ResultSet rs; int id = 1;
+
+            select = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.MESSAGE");
+            rs = select.executeQuery();
+
+            while (rs.next()) {
+                System.out.println("Message: " + rs.getInt("ID") + " " + rs.getString("MSG"));
+                id = rs.getInt("ID") + 1;
+            }
+            select.close();
+//=========================================Узнать последний ID
+            select = con.prepareStatement("INSERT INTO TESTDB.PUBLIC.MESSAGE (ID, MSG) VALUES (?, ?)");
+            select.setInt(1, id);
+            select.setString(2, msg);
+
+            select.executeUpdate();
+            select.close();
+//=================================Записать сообщение
+            select = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.MESSAGE WHERE ID = " + id);
+            rs = select.executeQuery();
+
+            while (rs.next()) {
+                System.out.println("New Message: " + rs.getInt(1) + " " + rs.getString(2));
+                System.out.println();
+            }
+            select.close();
+
 
         } catch (SQLException e) {
             System.out.println("Error: " + e);

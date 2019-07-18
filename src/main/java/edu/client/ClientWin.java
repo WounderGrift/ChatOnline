@@ -2,6 +2,7 @@ package edu.client;
 
 import edu.connection.TCPconnection;
 import edu.connection.TCPconnectionListener;
+import edu.server.ConnectBD;
 
 import javax.swing.*;
 import java.awt.*;
@@ -58,6 +59,7 @@ public class ClientWin extends JFrame implements ActionListener, TCPconnectionLi
         }
     }
 
+    private static ConnectBD connectBD;
     //Написать сообщение на экран
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -66,6 +68,8 @@ public class ClientWin extends JFrame implements ActionListener, TCPconnectionLi
             return;
         } else {
             fieldinput.setText(null);
+            connectBD = ConnectBD.getInstanse();
+            connectBD.messagePutToBD(msg);
             connection.sendString(name + ": " + msg);
         }
     }
