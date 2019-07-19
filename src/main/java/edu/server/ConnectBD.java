@@ -61,11 +61,7 @@ public class ConnectBD {
             System.out.println("Error of connection: " + e);
         }
 
-    }
-
-    public void CreateTable() {
         try {
-
             st.execute("CREATE TABLE IF NOT EXISTS TESTDB.PUBLIC.USER(\n" +
                     "  id INT AUTO_INCREMENT PRIMARY KEY,\n" +
                     "  name VARCHAR(50),\n" +
@@ -86,14 +82,14 @@ public class ConnectBD {
 
             System.out.println("Tables is created");
 
-            // st.close();
-            // con.close();
+             st.close();
+             //con.close();
 
         } catch (SQLException e) {
             System.out.println("Error " + e);
         }
-
     }
+
 
     public void authorisUsers(User user) {
         boolean gonnaToWin = false;
@@ -185,7 +181,7 @@ public class ConnectBD {
             rs = select.executeQuery();
 
             while (rs.next()) {
-                System.out.println("Message: " + rs.getInt("ID") + " " + rs.getString("MSG"));
+                System.out.println("Message From ID " + rs.getInt("ID") + " And Name " + rs.getString("MSG"));
                 id = rs.getInt("ID") + 1;
             }
             select.close();

@@ -1,8 +1,14 @@
 package edu.connection;
 
+import edu.client.User;
+import edu.server.ChatServer;
+
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.Charset;
+import java.rmi.registry.Registry;
+
+import static com.sun.xml.internal.ws.policy.sourcemodel.wspolicy.XmlToken.Name;
 
 /**
  * Created by Dima on 03.07.2019.
@@ -53,6 +59,17 @@ public class TCPconnection {
             }
         });
         rxThread.start();
+    }
+
+    public synchronized void nameUserToBD(User user){
+        try {
+            out.write(user.getName() + " " + user.getPass() + "\r\n");
+            out.flush();
+            ChatServer.RegistrUsers(user);
+        } catch (IOException e) {
+            eventListener.onException(TCPconnection.this, e);
+            disconnect();
+        }
     }
 
     //синхронизируем методы, чтобы он выполнялся только одним потоком

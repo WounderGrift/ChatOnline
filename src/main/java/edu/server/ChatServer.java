@@ -1,5 +1,6 @@
 package edu.server;
 
+import edu.client.ClientReg;
 import edu.client.User;
 import edu.connection.TCPconnection;
 import edu.connection.TCPconnectionListener;
@@ -9,7 +10,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
  * Created by Dima on 03.07.2019.
@@ -54,17 +54,18 @@ public class ChatServer implements TCPconnectionListener {
         }
     }
 
-    public static void RegistrUsers(User user) {
+    public synchronized static void RegistrUsers(User user) {
         connectBD = ConnectBD.getInstanse();
         System.out.println(connectBD);
         connectBD.registrUsers(user);
     }
 
-    public static void AuthorisUsers(User user) {
+    public synchronized static void AuthorisUsers(User user) {
         connectBD = ConnectBD.getInstanse();
         System.out.println(connectBD);
         connectBD.authorisUsers(user);
     }
+
 
     @Override
     public synchronized void onConnectionReady(TCPconnection TCPconnection) {
@@ -74,6 +75,10 @@ public class ChatServer implements TCPconnectionListener {
 
     @Override
     public synchronized void onReceiveString(TCPconnection TCPconnection, String value) {
+        System.out.println();
+        connectBD = ConnectBD.getInstanse();
+        connectBD.messagePutToBD(value);
+
         sendToAllConnections(value);
     }
 
@@ -96,4 +101,5 @@ public class ChatServer implements TCPconnectionListener {
             connections.get(i).sendString(value);
 
     }
+
 }

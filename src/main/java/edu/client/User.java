@@ -1,5 +1,8 @@
 package edu.client;
 
+import edu.connection.TCPconnection;
+import edu.connection.TCPconnectionListener;
+
 /**
  * Created by Dima on 18.07.2019.
  */
@@ -27,4 +30,5 @@ public class User {
     void setPass(String pass) {
         this.pass = pass;
     }
+
 }
