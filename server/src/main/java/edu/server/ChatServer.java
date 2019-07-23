@@ -72,6 +72,9 @@ public class ChatServer implements TCPconnectionListener {
     public synchronized void onConnectionReady(TCPconnection TCPconnection) {
         init = true;
         connections.add(TCPconnection);
+        if(connectBD.isOpenform()){
+            sendToAllConnections("client connected " + TCPconnection);
+        }
     }
 
     @Override
@@ -98,9 +101,7 @@ public class ChatServer implements TCPconnectionListener {
             }
             TCPconnection.sendString(String.valueOf(connectBD.isOpenform()));
 
-            if(connectBD.isOpenform()){
-                sendToAllConnections("client connected " + TCPconnection);
-            }
+
 
             init = !init;
         } else {
