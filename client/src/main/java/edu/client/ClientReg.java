@@ -45,7 +45,7 @@ public class ClientReg {
         pass = come.nextLine();
 
 
-        User user = new User(name, pass, reg);
+        User user = new User(name.replaceAll("\\s+", ""), pass.replaceAll("\\s+", ""), reg);
 
         ClientWin cw = new ClientWin(user);
 
