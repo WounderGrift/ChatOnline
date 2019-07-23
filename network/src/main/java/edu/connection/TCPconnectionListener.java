@@ -1,7 +1,5 @@
 package edu.connection;
 
-import edu.client.User;
-
 public interface TCPconnectionListener {
 
     void onConnectionReady(TCPconnection TCPconnection);

@@ -2,7 +2,7 @@ package edu.client;
 
 import edu.connection.TCPconnection;
 import edu.connection.TCPconnectionListener;
-import edu.server.ConnectBD;
+import edu.connection.User;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,8 +20,8 @@ public class ClientWin extends JFrame implements ActionListener, TCPconnectionLi
     private static final int PORT = 8189;
     private static final int WIDTH = 600;
     private static final int HEIGHT = 400;
-    private String name;
-    private String msg;
+    private String name, pass, msg;
+    private boolean init;
 
     private TCPconnection connection;
 
@@ -32,6 +32,8 @@ public class ClientWin extends JFrame implements ActionListener, TCPconnectionLi
 
     ClientWin(User user) {
         name = user.getName();
+        pass = user.getPass();
+
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(WIDTH, HEIGHT);
@@ -48,15 +50,17 @@ public class ClientWin extends JFrame implements ActionListener, TCPconnectionLi
         add(fieldNickName, BorderLayout.NORTH);
         add(fieldinput, BorderLayout.SOUTH);
 
-        setVisible(true);
+        //setVisible(true);
 
         //  Здесь намертво вставет интерфейс
         //  Oшибка была в разных портах сервера и клиента
         try {
-            connection = new TCPconnection(this, IP_ADDR, PORT);
+            connection = new TCPconnection(this, IP_ADDR, PORT, user.getName(), user.getPass(), user.getReg());
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Connection exception: " + e);
         }
+
+        connection.nameUserToBD();
     }
 
     //Написать сообщение на экран
@@ -75,12 +79,25 @@ public class ClientWin extends JFrame implements ActionListener, TCPconnectionLi
 
     @Override
     public synchronized void onConnectionReady(TCPconnection tcp_connection) {
+        init = true;
         printMessage("Connection ready...");
     }
 
     @Override
     public synchronized void onReceiveString(TCPconnection tcp_connection, String value) {
-        printMessage(value);
+        if(init){
+            switch (value){
+                case "true":{
+                    setVisible(true);
+                    init = !init;
+                }break;
+                case "false":{
+                    System.exit(0);
+                }break;
+            }
+        }else {
+            printMessage(value);
+        }
     }
 
     @Override

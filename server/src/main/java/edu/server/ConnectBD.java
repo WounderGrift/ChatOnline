@@ -1,18 +1,12 @@
 package edu.server;
 
-import edu.client.ClientReg;
-import edu.client.ClientWin;
-import edu.client.User;
+//import edu.client.ClientReg;
 import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.sql.*;
 import java.util.Properties;
 
@@ -29,6 +23,7 @@ public class ConnectBD {
     private Statement st;
     private ResultSet rs;
     private PreparedStatement select;
+    private boolean openform;
 
     private String msg;
 
@@ -41,11 +36,18 @@ public class ConnectBD {
         return instanse;
     }
 
-    private ConnectBD() {
+    public boolean isOpenform() {
+        return openform;
+    }
 
+    public void setOpenform(boolean openform) {
+        this.openform = openform;
+    }
+
+    private ConnectBD() {
         Properties prop = new Properties();
 
-        try (InputStream in = Files.newInputStream(Paths.get("src/main/resources/database.properties"))) {
+        try (InputStream in = Files.newInputStream(Paths.get("server/src/main/resources/database.properties"))) {
             prop.load(in);
             URL = prop.getProperty("URL");
             owner = prop.getProperty("owner");
@@ -91,13 +93,13 @@ public class ConnectBD {
     }
 
 
-    public void authorisUsers(User user) {
+    public void authorisUsers(String name, String pass) {
         boolean gonnaToWin = false;
-
+        setOpenform(false);
         try {
             PreparedStatement select = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.USER WHERE TESTDB.PUBLIC.USER.NAME = ? AND TESTDB.PUBLIC.USER.PASS = ?");
-            select.setString(1, user.getName());
-            select.setString(2, encodedPassword(user));
+            select.setString(1, name);
+            select.setString(2, pass);
             rs = select.executeQuery();
 
             while (rs.next()) {
@@ -107,7 +109,7 @@ public class ConnectBD {
             select.close();
 
             if (gonnaToWin) {
-                ClientReg.openWindowClient(user);
+                setOpenform(true);
             } else {
                 System.out.println("Неправильное имя или пароль");
                 return;
@@ -119,14 +121,15 @@ public class ConnectBD {
     }
 
 
-    public void registrUsers(User user) {
-        System.out.println(user);
+    public void registrUsers(String name, String pass) {
+        System.out.println(name + " " + pass);
+        setOpenform(false);
         try {
             int id = 0;
             ResultSet rs;
 
             select = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.USER WHERE TESTDB.PUBLIC.USER.NAME = ?");
-            select.setString(1, user.getName());
+            select.setString(1, name);
 
             rs = select.executeQuery();
 
@@ -151,8 +154,8 @@ public class ConnectBD {
 //============================Узнать последний ID
             select = con.prepareStatement("INSERT INTO TESTDB.PUBLIC.USER (id, name, pass) VALUES (?, ?, ?)");
             select.setInt(1, id);
-            select.setString(2, user.getName());
-            select.setString(3, encodedPassword(user));
+            select.setString(2, name);
+            select.setString(3, pass);
 
             select.executeUpdate();
             select.close();
@@ -162,10 +165,9 @@ public class ConnectBD {
 
             while (rs.next()) {
                 System.out.println("Sign in " + rs.getInt(1) + " " + rs.getString(2) + " " + rs.getString(3));
+                setOpenform(true);
             }
             select.close();
-
-            ClientReg.openWindowClient(user);
 
         } catch (SQLException e) {
             System.out.println("Error: " + e);
@@ -206,13 +208,6 @@ public class ConnectBD {
         } catch (SQLException e) {
             System.out.println("Error: " + e);
         }
-    }
-
-    public String encodedPassword(User user) {
-        BASE64Encoder enc = new BASE64Encoder();
-        String encodedPass = enc.encode(user.getPass().getBytes());
-        enc = null;
-        return encodedPass;
     }
 
     public String decodedPassword(String encodedPass) {

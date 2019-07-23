@@ -1,7 +1,4 @@
-package edu.client;
-
-import edu.connection.TCPconnection;
-import edu.connection.TCPconnectionListener;
+package edu.connection;
 
 /**
  * Created by Dima on 18.07.2019.
@@ -9,10 +6,12 @@ import edu.connection.TCPconnectionListener;
 public class User {
     private String name;
     private String pass;
+    private String reg;
 
-    public User(String name, String pass) {
+    public User(String name, String pass, String reg) {
         this.name = name;
         this.pass = pass;
+        this.reg = reg;
     }
 
     public String getName() {
@@ -23,6 +22,7 @@ public class User {
         return pass;
     }
 
+
     void setName(String name) {
         this.name = name;
     }
@@ -31,4 +31,12 @@ public class User {
         this.pass = pass;
     }
 
+
+    public String getReg() {
+        return reg;
+    }
+
+    public void setReg(String reg) {
+        this.reg = reg;
+    }
 }
