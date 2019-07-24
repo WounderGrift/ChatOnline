@@ -11,6 +11,13 @@
 
     <artifactId>client</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.demingames.woundergrift</groupId>
+            <artifactId>network</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
 
+    </dependencies>
 
 </project>
