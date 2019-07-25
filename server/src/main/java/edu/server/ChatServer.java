@@ -1,6 +1,7 @@
 package edu.server;
 
 //import edu.client.User;
+
 import edu.connection.TCPconnection;
 import edu.connection.TCPconnectionListener;
 
@@ -72,35 +73,36 @@ public class ChatServer implements TCPconnectionListener {
     public synchronized void onConnectionReady(TCPconnection TCPconnection) {
         init = true;
         connections.add(TCPconnection);
-        if(connectBD.isOpenform()){
+        if (connectBD.isOpenform()) {
             sendToAllConnections("client connected " + TCPconnection);
         }
     }
 
     @Override
     public synchronized void onReceiveString(TCPconnection TCPconnection, String value) {
-        if(init){
+        if (init) {
             IndexOfName = value.indexOf(" ");
-            name = value.substring( 0, IndexOfName);
+            name = value.substring(0, IndexOfName);
 
-            IndexOfPass = value.indexOf(" ", IndexOfName+1);
-            pass = value.substring(IndexOfName+1, IndexOfPass);
+            IndexOfPass = value.indexOf(" ", IndexOfName + 1);
+            pass = value.substring(IndexOfName + 1, IndexOfPass);
 
             IndexOfReg = value.indexOf(" ");
-            reg = value.substring(IndexOfPass+1);
+            reg = value.substring(IndexOfPass + 1);
 
-           // sendToAllConnections(name + "~" + pass + "~" + reg);
+            // sendToAllConnections(name + "~" + pass + "~" + reg);
 
-            switch (reg){
-                case "Y":{
-                    authorisUsers(name,pass);
-                }break;
-                case "N":{
+            switch (reg) {
+                case "Y": {
+                    authorisUsers(name, pass);
+                }
+                break;
+                case "N": {
                     registrUsers(name, pass);
-                }break;
+                }
+                break;
             }
             TCPconnection.sendString(String.valueOf(connectBD.isOpenform()));
-
 
 
             init = !init;
@@ -118,7 +120,7 @@ public class ChatServer implements TCPconnectionListener {
     @Override
     public synchronized void onDisconnect(TCPconnection TCPconnection) {
         connections.remove(TCPconnection);
-        if(connectBD.isOpenform()) {
+        if (connectBD.isOpenform()) {
             sendToAllConnections("client disconnected: " + TCPconnection);
         }
     }

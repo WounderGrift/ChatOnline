@@ -1,15 +1,11 @@
 package edu.server;
 
-//import edu.client.ClientReg;
 import sun.misc.BASE64Decoder;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.*;
 import java.util.Properties;
-
 
 /**
  * Created by Dima on 09.07.2019.
@@ -45,9 +41,12 @@ public class ConnectBD {
     }
 
     private ConnectBD() {
+        System.out.println(Thread.currentThread().getContextClassLoader());
+        String file = "database.properties";
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
         Properties prop = new Properties();
-
-        try (InputStream in = Files.newInputStream(Paths.get("server/src/main/resources/database.properties"))) {
+        System.out.println(loader.getResourceAsStream(file));
+        try (InputStream in = loader.getResourceAsStream(file)) {
             prop.load(in);
             URL = prop.getProperty("URL");
             owner = prop.getProperty("owner");
@@ -84,8 +83,8 @@ public class ConnectBD {
 
             System.out.println("Tables is created");
 
-             st.close();
-             //con.close();
+            st.close();
+            //con.close();
 
         } catch (SQLException e) {
             System.out.println("Error " + e);
@@ -136,7 +135,7 @@ public class ConnectBD {
             while (rs.next()) {
                 System.out.println("Этот пользователь уже есть");
                 select.close();
-
+                setOpenform(false);
                 return;
             }
 
@@ -177,7 +176,8 @@ public class ConnectBD {
     public void messagePutToBD(String msg) {
         try {
 
-            ResultSet rs; int id = 1;
+            ResultSet rs;
+            int id = 1;
 
             select = con.prepareStatement("SELECT * FROM TESTDB.PUBLIC.MESSAGE");
             rs = select.executeQuery();
@@ -215,8 +215,8 @@ public class ConnectBD {
         try {
             BASE64Decoder dec = new BASE64Decoder();
             decodedPass = new String(dec.decodeBuffer(encodedPass));
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("Error: " + e);
         }
 
         return decodedPass;
